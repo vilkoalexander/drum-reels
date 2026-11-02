@@ -1,0 +1,8 @@
+{
+  "name": "drum-reels",
+  "description": "Sync a livestream with camera recordings by audio and cut 9:16 reels and Resolve timelines with the reels CLI",
+  "version": "0.1.0",
+  "author": {"name": "Vilko Alexander"},
+  "repository": "https://github.com/vilkoalexander/drum-reels",
+  "skills": "./skills/"
+}

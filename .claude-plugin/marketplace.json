@@ -1,0 +1,11 @@
+{
+  "name": "drum-reels",
+  "owner": {"name": "Vilko Alexander"},
+  "plugins": [
+    {
+      "name": "drum-reels",
+      "source": "./",
+      "description": "Sync a livestream with camera recordings by audio and cut 9:16 reels and Resolve timelines with the reels CLI"
+    }
+  ]
+}

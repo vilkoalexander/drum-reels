@@ -1,0 +1,27 @@
+[fetch]
+format = "bv*[vcodec^=avc1][height<=1080]+ba[ext=m4a]/b[ext=mp4]"
+
+[sync]
+sample_rate = 16000
+envelope_hop = 160          # samples, 10 ms grid for the coarse pass
+fine_window_s = 20
+fine_every_s = 600
+fine_search_s = 2.0
+min_confidence = 4.0        # coarse z-score below which sync fails for that source
+warn_confidence = 8.0
+max_window_residual_ms = 50 # fine windows further than this from the fit are dropped
+max_drift_ppm = 300         # a fitted clock rate further from 1 than this falls back to the coarse offset
+
+[cut]
+default_len_s = 30
+min_len_s = 5               # a shorter noted length is an error: a label ending in a number reads as a length
+handle_s = 2
+beats_per_bar = 4
+snap_to_bars = true
+codec = "h264"              # "h264" (h264_videotoolbox) or "prores" (prores_ks profile 2)
+bitrate_mbps = 50
+people = ["guitar", "keys", "bass", "vocals", "vocal", "singer", "piano"]
+
+[fcpxml]
+per_service = true
+per_moment = true

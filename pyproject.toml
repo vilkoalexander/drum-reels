@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reels"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["numpy", "scipy", "librosa", "soundfile", "yt-dlp"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+people = ["ultralytics", "opencv-python"]
+
+[project.scripts]
+reels = "reels.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
