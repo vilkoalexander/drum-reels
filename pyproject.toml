@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "reels"
 version = "0.1.0"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = ["numpy", "scipy", "librosa", "soundfile", "yt-dlp"]
 
