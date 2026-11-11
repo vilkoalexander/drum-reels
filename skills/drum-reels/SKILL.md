@@ -57,11 +57,22 @@ overwrites those edits, so don't rerun it after hand edits. Output: `out/reels/<
 ## Short from any edited video
 
 ```
-reels short <video> --seconds 20 --grade film --title "..."
+reels short <video> --seconds 20 --grade film --title "..." [--subs FILE.srt]
 ```
 
-Picks the busiest bars by beat grid. `--start S` overrides the pick. Grades: film, punchy,
+Picks the busiest bars by beat grid. `--start S` overrides the pick. `--subs` burns the .srt lines
+that fall inside the short into the lower third. Grades: film, punchy,
 mono, none. Log footage (DJI D-Log) needs the vendor LUT applied first.
+
+## Subtitles from a music video
+
+```
+reels subs <video> [--out FILE.srt] [--lang en] [--translate] [--force]
+reels translate <file.srt> [--from LANG] [--force]
+```
+
+Standalone, no service folder. Writes `<video>.<lang>.srt` and `.txt` beside the video. Needs
+`pip install -e '.[subs]'`. Won't overwrite existing .srt/.txt without `--force` (users hand-edit them). `--translate` (and `translate` on a hand-edited .srt) adds the other two of en/uk/he via Claude; needs `pip install -e '.[translate]'` and `ANTHROPIC_API_KEY`. Tell the user to check the `shaky` and `cleaned` lines in the result before uploading.
 
 ## When sync looks wrong
 

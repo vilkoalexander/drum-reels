@@ -12,6 +12,8 @@ dependencies = ["numpy", "scipy", "librosa", "soundfile", "yt-dlp"]
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 people = ["ultralytics", "opencv-python"]
+subs = ["mlx-whisper", "demucs"]
+translate = ["anthropic"]
 
 [project.scripts]
 reels = "reels.cli:main"

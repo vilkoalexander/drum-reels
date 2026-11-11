@@ -1,4 +1,6 @@
+import importlib.util
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -54,6 +56,13 @@ def checks(folder: Path) -> list[tuple[str, bool, str]]:
     except ImportError:
         ytdlp = None
     rows.append(("yt-dlp", ytdlp is not None, ytdlp or "pip install yt-dlp"))
+    for name, module in (("mlx-whisper", "mlx_whisper"), ("demucs", "demucs")):
+        found = importlib.util.find_spec(module) is not None
+        rows.append((name, found, "" if found else "needed by reels subs: pip install -e '.[subs]'"))
+    found = importlib.util.find_spec("anthropic") is not None
+    rows.append(("anthropic", found, "" if found else "needed by reels translate: pip install -e '.[translate]'"))
+    key = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    rows.append(("ANTHROPIC_API_KEY", key, "" if key else "needed by reels translate: export your Claude API key"))
     rows.append(("DaVinci Resolve", RESOLVE.exists(), "free edition imports out/timeline.fcpxml" if RESOLVE.exists() else "not found"))
     usage = shutil.disk_usage(folder)
     rows.append(("disk free", usage.free > 50 * 2**30, f"{usage.free / 2**30:.0f} GB at {folder}"))

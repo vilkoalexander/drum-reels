@@ -38,6 +38,10 @@ reels run    <service> [--url URL] [--notes FILE] [--force]  run the stages in o
 reels doctor [folder]                           check ffmpeg, yt-dlp, Resolve and disk space
 reels synth  <folder> [--duration S] [--style drums|bursts]  write a synthetic service with truth.json
 reels eval   <service> [--max-ms 5] [--max-ppm 10]  compare work/sync.json with truth.json
+reels short  <video> [--seconds S] [--start S] [--out DIR] [--name N] [--grade G] [--title T] [--caption C]
+             [--subs FILE.srt]                  9:16 short of the busiest bars, subtitles burned in with --subs
+reels subs   <video> [--out FILE.srt] [--lang en] [--translate] [--force]  write <video>.<lang>.srt and .txt lyrics from the sung vocals
+reels translate <file.srt> [--from LANG] [--force]  write the other two of en, uk, he beside it
 ```
 
 Every command prints exactly one JSON line on stdout, `{"ok": true, "command": ..., ...}` with what
@@ -53,6 +57,18 @@ plus a `wide` view, a flat camera gets the rotation under which people stand upr
 cuts/<slug>/looks.toml and cuts/<slug>/looks.jpg, the 360 frame with a degree scale and every view
 marked. Rename the looks, fix a yaw from the picture, edit the pattern; `--force` overwrites your edits.
 Needs `pip install -e '.[people]'` and models/yolo11n.pt.
+
+`reels subs` listens to a music video and writes <video>.<lang>.srt and <video>.<lang>.txt beside it, ready to upload
+to YouTube. Demucs isolates the vocals, mlx-whisper transcribes them, words over instrumental stretches
+are dropped, and low-confidence lines are listed under `shaky` and logged with their MM:SS time so you can
+fix them by hand. Captions Whisper itself doubts are dropped. It refuses to overwrite an existing .srt or
+.txt without `--force`, since people edit them. It does not use a service folder. Needs `pip install -e '.[subs]'`.
+
+`reels subs --translate` and `reels translate` write the three tracks en, uk and he with the Claude API
+(one request per song, model from `[translate]` in reels.toml, key in `ANTHROPIC_API_KEY`). Timings are copied
+from the source track, so all tracks switch lines together. `subs --translate` also fixes foreign words the
+recogniser mangled (listed under `cleaned`); `translate` never touches your .srt. Needs
+`pip install -e '.[translate]'`.
 
 `reels reel` turns one cuts/<slug>/ folder into out/reels/<name>.mp4: it renders each look in
 looks.toml into work/reels/<name>/, then Remotion in remotion/ cuts between them every two bars,
@@ -93,7 +109,7 @@ cropped to 9:16) always exists. Run `npm install` in remotion/ once.
                                                 │
                                                 ▼
                                      Remotion: cut every 2 bars,
-                                     zoom moves, title/caption/stickers
+                                     zoom moves, title/caption/stickers/subtitles
                                      ──► out/reels/<name>.mp4
 
  short: any edited video ──► beat grid ──► busiest N bars ──► same Remotion path

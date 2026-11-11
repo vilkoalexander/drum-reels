@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from reels.service import StageError
+from reels.subtitles import Caption
 from reels.timeline.looks import HEIGHT, WIDTH, Look
 
 FPS = 30
@@ -55,11 +56,24 @@ def _shots(names: list[str], bar_s: float, total: int) -> list[Shot]:
 
 TITLE_DELAY, TITLE_FRAMES = 4, 100
 CAPTION_DELAY = 18
+MIN_SUBTITLE_S = 0.25
 STICKER_DELAY, STICKER_TAIL = 4, 6
 
 
+def window_subtitles(captions: list[Caption], start_s: float, length_s: float) -> list[Caption]:
+    """Captions overlapping the window, on the window's own clock and clipped to it, one at a time."""
+    inside = []
+    for c in sorted(captions, key=lambda c: c.start):
+        start, end = max(c.start, start_s) - start_s, min(c.end, start_s + length_s) - start_s
+        if inside and start < inside[-1].end:
+            inside[-1] = replace(inside[-1], end=max(inside[-1].start, start))
+        if end - start > 0:
+            inside.append(replace(c, start=start, end=end))
+    return [c for c in inside if c.end - c.start >= MIN_SUBTITLE_S]
+
+
 def props(reel_plan: Plan, looks: dict[str, Look], title: str | None, caption: str | None,
-          look_texts: dict[str, str]) -> dict:
+          look_texts: dict[str, str], subtitles: list[Caption] = ()) -> dict:
     shots, texts, pushes = [], [], 0
     for shot in reel_plan.shots:
         move = None
@@ -78,5 +92,9 @@ def props(reel_plan: Plan, looks: dict[str, Look], title: str | None, caption: s
     if caption and reel_plan.frames > CAPTION_DELAY:
         texts.append({"text": caption, "from": CAPTION_DELAY, "duration": reel_plan.frames - CAPTION_DELAY,
                       "kind": "caption"})
+    for c in subtitles:
+        first, last = round(c.start * FPS), min(reel_plan.frames, round(c.end * FPS))
+        if last > first:
+            texts.append({"text": c.text, "from": first, "duration": last - first, "kind": "subtitle"})
     return {"fps": FPS, "width": WIDTH, "height": HEIGHT, "durationInFrames": reel_plan.frames,
             "audio": "audio.wav", "shots": shots, "texts": texts}

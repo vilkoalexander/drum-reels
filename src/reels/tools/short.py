@@ -9,6 +9,7 @@ from reels import media
 from reels.analysis import beats
 from reels.service import StageError, write_json
 from reels.stages.reel import check_remotion, remotion_render, render_look
+from reels.subtitles import parse_srt
 from reels.timeline import reel
 from reels.timeline.looks import SRC, check_grade, look_filter
 
@@ -29,6 +30,7 @@ class Options:
     grade: str = "none"
     title: str | None = None
     caption: str | None = None
+    subs: str | None = None
 
 
 def best_window(downbeats_s: list[float], times_s: np.ndarray, strength: np.ndarray, bars: int) -> int:
@@ -67,6 +69,12 @@ def run(opts: Options, cfg) -> dict:
         raise StageError(f"{src} not found")
     check_grade(opts.grade)
     check_remotion()
+    captions = []
+    if opts.subs:
+        try:
+            captions = parse_srt(Path(opts.subs).read_text(encoding="utf-8-sig"))
+        except (OSError, UnicodeDecodeError) as e:
+            raise StageError(f"cannot read {opts.subs}: {e}") from e
     out_dir = Path(opts.out) if opts.out else src.parent / "shorts"
     name = opts.name or src.stem.replace(" ", "_")
     work = out_dir / ".work" / name
@@ -97,10 +105,13 @@ def run(opts: Options, cfg) -> dict:
         ["-vn", "-c:a", "pcm_s16le", "-ar", str(media.AUDIO_RATE), "-f", "wav"],
         work / "audio.wav",
     )
+    subtitles = reel.window_subtitles(captions, start_s, reel_plan.length_s)
+    if opts.subs and not subtitles:
+        log.warning("no caption in %s falls inside %.1f-%.1f s", opts.subs, start_s, start_s + reel_plan.length_s)
     props_path = work / "props.json"
-    write_json(props_path, reel.props(reel_plan, {"src": SRC}, opts.title, opts.caption, {}))
+    write_json(props_path, reel.props(reel_plan, {"src": SRC}, opts.title, opts.caption, {}, subtitles))
     output = out_dir / f"{name}.mp4"
     remotion_render(props_path.resolve(), work.resolve(), output.resolve())
     log.info("%s written", output)
     return {"ok": True, "output": str(output), "start_s": round(start_s, 2), "seconds": round(reel_plan.length_s, 2),
-            "bpm": round(grid.bpm, 1)}
+            "bpm": round(grid.bpm, 1), **({"subtitles": len(subtitles)} if opts.subs else {})}

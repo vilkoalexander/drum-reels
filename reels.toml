@@ -25,3 +25,6 @@ people = ["guitar", "keys", "bass", "vocals", "vocal", "singer", "piano"]
 [fcpxml]
 per_service = true
 per_moment = true
+
+[translate]
+model = "claude-sonnet-5-5"   # Claude model used by reels translate and reels subs --translate

@@ -10,6 +10,7 @@ def test_defaults_load_without_path():
     assert cfg.sync.sample_rate == 16000
     assert cfg.cut.people[0] == "guitar"
     assert cfg.fcpxml.per_moment is True
+    assert cfg.translate.model == "claude-sonnet-5-5"
 
 
 def test_explicit_missing_path_raises(tmp_path):
@@ -95,4 +96,13 @@ def test_zero_is_rejected_for_every_positive_key(tmp_path, where):
     path = tmp_path / "reels.toml"
     path.write_text(f"[{section}]\n{key} = 0\n")
     with pytest.raises(ValueError, match="must be positive"):
+        config.load(path)
+
+
+def test_translate_model_is_configurable(tmp_path):
+    path = tmp_path / "c.toml"
+    path.write_text('[translate]\nmodel = "claude-opus-5-5"\n')
+    assert config.load(path).translate.model == "claude-opus-5-5"
+    path.write_text("[translate]\nmodel = 5\n")
+    with pytest.raises(ValueError, match=r"translate\.model must be a str"):
         config.load(path)

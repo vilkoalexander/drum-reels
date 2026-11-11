@@ -9,7 +9,7 @@ from reels import config, log
 from reels.service import Service, StageError, UsageError
 
 STAGES = ("fetch", "sync", "cut", "render")
-TOOLS = ("doctor", "synth", "eval", "short")
+TOOLS = ("doctor", "synth", "eval", "short", "subs", "translate")
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,19 @@ def build_parser() -> argparse.ArgumentParser:
     short.add_argument("--grade", help="colour look: film, punchy, mono or none (default)")
     short.add_argument("--title")
     short.add_argument("--caption")
+    short.add_argument("--subs", metavar="FILE.srt", help="burn these subtitle lines into the short")
+
+    subs = command("subs", "listen to a music video and write .srt subtitles and .txt lyrics")
+    subs.add_argument("video")
+    subs.add_argument("--out", help="path of the .srt (must end in .srt), default <video>.<lang>.srt; the .txt goes beside it")
+    subs.add_argument("--lang", help="sung language, default en")
+    subs.add_argument("--force", action="store_true", help="overwrite existing .srt and .txt files")
+    subs.add_argument("--translate", action="store_true", help="also write the other two of en, uk, he with Claude")
+
+    translate = command("translate", "translate an .srt into the other two of en, uk, he with Claude")
+    translate.add_argument("file")
+    translate.add_argument("--from", dest="source_lang", help="language of the file, default from <name>.<lang>.srt")
+    translate.add_argument("--force", action="store_true", help="overwrite existing tracks")
     return parser
 
 

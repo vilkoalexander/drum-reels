@@ -22,10 +22,10 @@ def test_no_arguments_is_usage_error(capsys):
 
 def test_help_lists_all_subcommands(capsys):
     assert main(["--help"]) == 0
-    assert "{fetch,sync,cut,render,looks,reel,run,doctor,synth,eval,short}" in capsys.readouterr().out
+    assert "{fetch,sync,cut,render,looks,reel,run,doctor,synth,eval,short,subs,translate}" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("name", ["fetch", "sync", "cut", "render", "looks", "reel", "run", "doctor", "synth", "eval", "short"])
+@pytest.mark.parametrize("name", ["fetch", "sync", "cut", "render", "looks", "reel", "run", "doctor", "synth", "eval", "short", "subs", "translate"])
 def test_each_subcommand_has_help(name, capsys):
     assert main([name, "--help"]) == 0
 

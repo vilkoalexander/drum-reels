@@ -45,11 +45,17 @@ class FcpxmlCfg:
 
 
 @dataclass(frozen=True)
+class TranslateCfg:
+    model: str = "claude-sonnet-5-5"
+
+
+@dataclass(frozen=True)
 class Config:
     fetch: FetchCfg = field(default_factory=FetchCfg)
     sync: SyncCfg = field(default_factory=SyncCfg)
     cut: CutCfg = field(default_factory=CutCfg)
     fcpxml: FcpxmlCfg = field(default_factory=FcpxmlCfg)
+    translate: TranslateCfg = field(default_factory=TranslateCfg)
 
 
 DEFAULT_PATH = Path(__file__).resolve().parents[2] / "reels.toml"

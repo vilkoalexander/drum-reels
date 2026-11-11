@@ -1,6 +1,7 @@
 import pytest
 
 from reels.service import StageError
+from reels.subtitles import Caption
 from reels.timeline import reel
 from reels.timeline.looks import MASTER, SRC, Look
 
@@ -72,3 +73,22 @@ def test_props_drop_texts_too_short_to_show():
     props = reel.props(plan, {"src": SRC}, "Title", "Caption", {})
     assert plan.frames == 15
     assert [t["kind"] for t in props["texts"]] == ["title"]
+
+
+def test_window_subtitles_shift_clip_and_drop_slivers():
+    caps = [Caption(1.0, 4.0, "before"), Caption(8.0, 12.0, "first"), Caption(14.0, 16.0, "inside"),
+            Caption(18.0, 25.0, "last"), Caption(30.0, 31.0, "after")]
+    got = reel.window_subtitles(caps, 10.0, 10.0)
+    assert [(c.text, c.start, c.end) for c in got] == [("first", 0.0, 2.0), ("inside", 4.0, 6.0), ("last", 8.0, 10.0)]
+    assert reel.window_subtitles([Caption(19.9, 25.0, "sliver")], 10.0, 10.0) == []
+
+
+def test_window_subtitles_show_one_at_a_time():
+    got = reel.window_subtitles([Caption(0.0, 5.0, "a"), Caption(3.0, 6.0, "b")], 0.0, 10.0)
+    assert [(c.text, c.start, c.end) for c in got] == [("a", 0.0, 3.0), ("b", 3.0, 6.0)]
+
+
+def test_props_turn_subtitles_into_subtitle_texts():
+    plan = reel.single_plan(0.0, 4, 2.0)
+    props = reel.props(plan, {"src": SRC}, None, None, {}, [Caption(1.0, 2.5, "line")])
+    assert props["texts"] == [{"text": "line", "from": 30, "duration": 45, "kind": "subtitle"}]

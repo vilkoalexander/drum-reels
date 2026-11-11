@@ -75,6 +75,13 @@ const KIND = {
   step: {size: 40, weight: 700, spacing: 6, top: 220},
 } as const;
 
+const MAX_WIDTH = 880;
+const GLYPH_WIDTH = 0.62;
+
+// shrink long subtitles so they wrap to two lines at most inside MAX_WIDTH
+const fitSize = (text: string, size: number) =>
+  Math.min(size, Math.floor((2 * MAX_WIDTH * 0.9) / (GLYPH_WIDTH * text.length)));
+
 const TextLine = ({text, kind, duration}: {text: string; kind: Text['kind']; duration: number}) => {
   const frame = useCurrentFrame();
   const style = KIND[kind];
@@ -89,13 +96,14 @@ const TextLine = ({text, kind, duration}: {text: string; kind: Text['kind']; dur
         style={{
           fontFamily,
           fontWeight: style.weight,
-          fontSize: style.size,
+          fontSize: kind === 'subtitle' ? fitSize(text, style.size) : style.size,
           letterSpacing: style.spacing,
           lineHeight: 1.15,
           color: 'white',
           textAlign: 'center',
-          maxWidth: 880,
-          textShadow: '0 2px 18px rgba(0,0,0,0.55)',
+          maxWidth: MAX_WIDTH,
+          textWrap: 'balance',
+          textShadow: kind === 'subtitle' ? '0 1px 4px rgba(0,0,0,0.9), 0 2px 18px rgba(0,0,0,0.6)' : '0 2px 18px rgba(0,0,0,0.55)',
           opacity: enter * leave,
           transform: `translateY(${(1 - enter) * 16}px)`,
         }}
